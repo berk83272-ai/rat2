@@ -3,102 +3,190 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kalpli Mesaj - Berk Edition</title>
+  <title>Kalpli Geri Sayım</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      height:100vh;
-      background:#000;
-      color:#fff;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow:hidden;
-      display:flex;
-      justify-content:center;
-      align-items:center;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .container {
-      position:relative;
-      width:100%;
-      height:100%;
-      background: radial-gradient(circle at center, #3a0025 0%, #000 65%);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      padding:30px;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #2a001f 0%, #000 70%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
     }
     .heart-rain {
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      overflow:hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
     }
     .heart {
-      position:absolute;
-      font-size:18px;
-      color:#ff85d4;
-      animation:fall linear infinite;
-      user-select:none;
+      position: absolute;
+      font-size: 20px;
+      color: #ff85d4;
+      animation: waterfall linear infinite;
+      transform: translateY(-100%);
+      user-select: none;
+      text-shadow: 0 0 8px #ff4da6;
     }
-    @keyframes fall {
-      0% { transform:translateY(-120vh) rotate(0deg); opacity:0.9; }
-      100% { transform:translateY(140vh) rotate(1080deg); opacity:0; }
+    @keyframes waterfall {
+      0% {
+        transform: translateY(-120%) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(140vh) rotate(720deg);
+        opacity: 0;
+      }
     }
-    .content { position:relative; z-index:2; }
+    .content {
+      position: relative;
+      z-index: 5;
+    }
+    .big-heart {
+      position: relative;
+      width: 320px;
+      height: 300px;
+      margin: 20px auto;
+    }
+    .heart-shape {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ff9edc 0%, #ff4da6 100%);
+      clip-path: polygon(50% 20%, 100% 0%, 100% 40%, 75% 100%, 50% 80%, 25% 100%, 0% 40%, 0% 0%);
+      filter: drop-shadow(0 0 40px #ff4da6);
+      animation: pulse 3s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .cat-in-heart {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 140px;
+      filter: drop-shadow(0 0 20px #fff);
+      z-index: 10;
+    }
+    .countdown {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff9edc;
+      text-shadow: 0 0 15px #ff4da6;
+      background: rgba(0,0,0,0.4);
+      padding: 10px 20px;
+      border-radius: 20px;
+      white-space: nowrap;
+      z-index: 10;
+    }
     .top-text {
-      font-size:32px;
-      font-weight:700;
-      color:#ff9edc;
-      margin-bottom:12px;
-      text-shadow:0 0 20px #ff4da6, 0 0 35px #ff4da6;
-      letter-spacing:1px;
-    }
-    .main-heart {
-      font-size:220px;
-      line-height:0.9;
-      margin:25px 0;
-      filter:drop-shadow(0 0 30px #ff4da6);
+      font-size: 32px;
+      font-weight: 700;
+      color: #ff9edc;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px #ff4da6;
     }
     .bottom-text {
-      font-size:62px;
-      font-weight:900;
-      color:#ff9edc;
-      text-shadow:0 0 30px #ff4da6, 0 0 50px #ff4da6, 0 0 70px #ff4da6;
-      letter-spacing:4px;
+      font-size: 70px;
+      font-weight: 900;
+      color: #ff9edc;
+      text-shadow: 0 0 40px #ff4da6, 0 0 60px #ff4da6;
+      letter-spacing: 4px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="heart-rain" id="hearts"></div>
-    
+    <div class="heart-rain" id="rain"></div>
+
     <div class="content">
       <div class="top-text">*Sayılı gün hızlı geçer.</div>
-      
-      <div class="main-heart">₍˄·͈༝·͈˄₎</div>
-      
+
+      <div class="big-heart">
+        <div class="heart-shape"></div>
+        <div class="cat-in-heart">₍˄·͈༝·͈˄₎</div> <!-- Pusheen stili kedi -->
+        <div class="countdown" id="countdown"></div>
+      </div>
+
       <div class="bottom-text">DİMİ?</div>
     </div>
   </div>
 
   <script>
+    // Kalp şelalesi (daha yoğun ve akıcı)
     function createHeart() {
       const heart = document.createElement("div");
       heart.className = "heart";
-      heart.innerHTML = ["♡","💗","💕","💖"][Math.floor(Math.random()*4)];
+      heart.innerHTML = "💗"; // veya ♡, ♥, 💕 dene istersen
       heart.style.left = Math.random() * 100 + "vw";
-      heart.style.animationDuration = (Math.random() * 4 + 5) + "s";
-      heart.style.animationDelay = Math.random() * 3 + "s";
-      heart.style.opacity = Math.random() * 0.4 + 0.6;
-      document.getElementById("hearts").appendChild(heart);
-      setTimeout(() => heart.remove(), 9000);
+      heart.style.animationDuration = (Math.random() * 5 + 6) + "s"; // 6-11 sn arası düşsün
+      heart.style.animationDelay = Math.random() * 2 + "s";
+      heart.style.opacity = Math.random() * 0.5 + 0.5;
+      document.getElementById("rain").appendChild(heart);
+      setTimeout(() => heart.remove(), 12000);
     }
 
-    setInterval(createHeart, 120); // Daha yoğun yağsın
+    setInterval(createHeart, 80); // Çok yoğun şelale için 80ms
+    for(let i = 0; i < 30; i++) createHeart(); // Başlangıçta doldur
 
-    // Başlangıçta bol kalp
-    for(let i = 0; i < 25; i++) createHeart();
+    // Geri sayım - Doğum günü 2 Aralık (yıl otomatik sonraki)
+    function getNextBirthday() {
+      const now = new Date();
+      let birthday = new Date(now.getFullYear(), 11, 2); // Aralık = 11
+      if (now > birthday) {
+        birthday.setFullYear(now.getFullYear() + 1);
+      }
+      return birthday;
+    }
+
+    function updateCountdown() {
+      const target = getNextBirthday();
+      const diff = target - new Date();
+      if (diff <= 0) {
+        document.getElementById("countdown").innerHTML = "Doğum günün kutlu olsun!";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerHTML = 
+        `${days}g ${hours}s ${minutes}d ${seconds}sn`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
   </script>
 </body>
 </html>
