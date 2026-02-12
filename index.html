@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kalpli Geri Sayım</title>
+  <title>Kalpli Geri Sayım V2</title>
   <style>
     * {
       margin: 0;
@@ -66,37 +66,46 @@
     }
     .big-heart {
       position: relative;
-      width: 320px;
-      height: 300px;
+      width: 300px;
+      height: 280px;
       margin: 20px auto;
     }
     .heart-shape {
       position: absolute;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #ff9edc 0%, #ff4da6 100%);
-      clip-path: polygon(50% 20%, 100% 0%, 100% 40%, 75% 100%, 50% 80%, 25% 100%, 0% 40%, 0% 0%);
+      background: linear-gradient(135deg, #ffd1e6 0%, #ffb3d9 100%); /* Toz pembe orta */
+      border: 5px solid #fff; /* Beyaz kenarlar */
+      border-radius: 50% 50% 0 0;
+      transform: rotate(45deg);
+      clip-path: path('M150 0 C67.5 0 0 67.5 0 150 C0 232.5 67.5 300 150 300 C232.5 300 300 232.5 300 150 C300 67.5 232.5 0 150 0 Z'); /* Daha iyi geometri için path */
       filter: drop-shadow(0 0 40px #ff4da6);
       animation: pulse 3s infinite ease-in-out;
     }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    .cat-in-heart {
+    .heart-shape::before,
+    .heart-shape::after {
+      content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 140px;
-      filter: drop-shadow(0 0 20px #fff);
-      z-index: 10;
+      width: 150px;
+      height: 150px;
+      background: inherit;
+      border: inherit;
+      border-radius: 50%;
+      top: -75px;
+      left: 0;
+    }
+    .heart-shape::after {
+      left: 150px;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1) rotate(45deg); }
+      50% { transform: scale(1.05) rotate(45deg); }
     }
     .countdown {
       position: absolute;
-      bottom: 40px;
+      bottom: 60px; /* Orta alt kısım */
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) rotate(-45deg); /* Kalp rotasyonuna uyum */
       font-size: 28px;
       font-weight: bold;
       color: #ff9edc;
@@ -129,11 +138,10 @@
     <div class="heart-rain" id="rain"></div>
 
     <div class="content">
-      <div class="top-text">*Sayılı gün hızlı geçer.</div>
+      <div class="top-text">Sayılı gün hızlı geçer.</div>
 
       <div class="big-heart">
         <div class="heart-shape"></div>
-        <div class="cat-in-heart">₍˄·͈༝·͈˄₎</div> <!-- Pusheen stili kedi -->
         <div class="countdown" id="countdown"></div>
       </div>
 
@@ -142,26 +150,26 @@
   </div>
 
   <script>
-    // Kalp şelalesi (daha yoğun ve akıcı)
+    // Kalp şelalesi
     function createHeart() {
       const heart = document.createElement("div");
       heart.className = "heart";
-      heart.innerHTML = "💗"; // veya ♡, ♥, 💕 dene istersen
+      heart.innerHTML = "💗";
       heart.style.left = Math.random() * 100 + "vw";
-      heart.style.animationDuration = (Math.random() * 5 + 6) + "s"; // 6-11 sn arası düşsün
+      heart.style.animationDuration = (Math.random() * 5 + 6) + "s";
       heart.style.animationDelay = Math.random() * 2 + "s";
       heart.style.opacity = Math.random() * 0.5 + 0.5;
       document.getElementById("rain").appendChild(heart);
       setTimeout(() => heart.remove(), 12000);
     }
 
-    setInterval(createHeart, 80); // Çok yoğun şelale için 80ms
-    for(let i = 0; i < 30; i++) createHeart(); // Başlangıçta doldur
+    setInterval(createHeart, 80);
+    for(let i = 0; i < 30; i++) createHeart();
 
-    // Geri sayım - Doğum günü 2 Aralık (yıl otomatik sonraki)
+    // Geri sayım
     function getNextBirthday() {
       const now = new Date();
-      let birthday = new Date(now.getFullYear(), 11, 2); // Aralık = 11
+      let birthday = new Date(now.getFullYear(), 11, 2);
       if (now > birthday) {
         birthday.setFullYear(now.getFullYear() + 1);
       }
