@@ -1,200 +1,408 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kalpli Geri Sayım V2</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      height: 100vh;
-      background: #000;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, #2a001f 0%, #000 70%);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-    }
-    .heart-rain {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .heart {
-      position: absolute;
-      font-size: 20px;
-      color: #ff85d4;
-      animation: waterfall linear infinite;
-      transform: translateY(-100%);
-      user-select: none;
-      text-shadow: 0 0 8px #ff4da6;
-    }
-    @keyframes waterfall {
-      0% {
-        transform: translateY(-120%) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(140vh) rotate(720deg);
-        opacity: 0;
-      }
-    }
-    .content {
-      position: relative;
-      z-index: 5;
-    }
-    .big-heart {
-      position: relative;
-      width: 300px;
-      height: 280px;
-      margin: 20px auto;
-    }
-    .heart-shape {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #ffd1e6 0%, #ffb3d9 100%); /* Toz pembe orta */
-      border: 5px solid #fff; /* Beyaz kenarlar */
-      border-radius: 50% 50% 0 0;
-      transform: rotate(45deg);
-      clip-path: path('M150 0 C67.5 0 0 67.5 0 150 C0 232.5 67.5 300 150 300 C232.5 300 300 232.5 300 150 C300 67.5 232.5 0 150 0 Z'); /* Daha iyi geometri için path */
-      filter: drop-shadow(0 0 40px #ff4da6);
-      animation: pulse 3s infinite ease-in-out;
-    }
-    .heart-shape::before,
-    .heart-shape::after {
-      content: '';
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      background: inherit;
-      border: inherit;
-      border-radius: 50%;
-      top: -75px;
-      left: 0;
-    }
-    .heart-shape::after {
-      left: 150px;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1) rotate(45deg); }
-      50% { transform: scale(1.05) rotate(45deg); }
-    }
-    .countdown {
-      position: absolute;
-      bottom: 60px; /* Orta alt kısım */
-      left: 50%;
-      transform: translateX(-50%) rotate(-45deg); /* Kalp rotasyonuna uyum */
-      font-size: 28px;
-      font-weight: bold;
-      color: #ff9edc;
-      text-shadow: 0 0 15px #ff4da6;
-      background: rgba(0,0,0,0.4);
-      padding: 10px 20px;
-      border-radius: 20px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .top-text {
-      font-size: 32px;
-      font-weight: 700;
-      color: #ff9edc;
-      margin-bottom: 10px;
-      text-shadow: 0 0 20px #ff4da6;
-    }
-    .bottom-text {
-      font-size: 70px;
-      font-weight: 900;
-      color: #ff9edc;
-      text-shadow: 0 0 40px #ff4da6, 0 0 60px #ff4da6;
-      letter-spacing: 4px;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OMNI V48 | MOBILE</title>
+    
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.0/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.0/ext-language_tools.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #00d4ff; --admin: #00ff41; --danger: #ff003c;
+            --bg: #020202; --panel: #0a0a0c; --border: #1f1f23;
+            --text: #e0e0e0;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Fira Code', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 56px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            z-index: 100;
+        }
+
+        .logo { 
+            font-family: 'Orbitron'; 
+            font-size: 18px; 
+            color: var(--primary); 
+            letter-spacing: 2px;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-run { background: var(--primary); color: #000; border: none; font-weight: bold; padding: 8px 16px; }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #editor-wrapper {
+            flex: 1;
+            position: relative;
+            background: #000;
+            min-height: 40vh;
+        }
+
+        #ace-editor {
+            position: absolute;
+            inset: 0;
+            font-size: 14px !important;
+        }
+
+        #terminal-drawer {
+            position: absolute;
+            bottom: 0;
+            left: 0; right: 0;
+            height: 45%;
+            background: rgba(0,0,0,0.96);
+            border-top: 2px solid var(--primary);
+            display: none;
+            flex-direction: column;
+            z-index: 200;
+        }
+
+        .term-head {
+            background: #000;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #term-body {
+            flex: 1;
+            padding: 12px;
+            font-size: 13px;
+            color: var(--admin);
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .intelligence {
+            background: var(--panel);
+            border-top: 1px solid var(--border);
+            max-height: 32vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.5);
+            font-size: 11px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chat-stream {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 12px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .chat-input-area {
+            padding: 8px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .flat-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-family: inherit;
+            border-radius: 4px;
+        }
+
+        footer {
+            height: 32px;
+            background: #000;
+            border-top: 1px solid var(--border);
+            padding: 0 12px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #555;
+        }
+
+        /* Overlord Modal - Mobile */
+        #overlord-panel {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .ov-sidebar {
+            padding: 16px;
+            border-bottom: 1px solid var(--admin);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .ov-tab {
+            flex: 1 1 45%;
+            padding: 10px;
+            background: rgba(0,255,65,0.05);
+            border: 1px solid var(--admin);
+            color: var(--admin);
+            font-size: 11px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .ov-main {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .ov-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .ov-card {
+            background: #111;
+            border: 1px solid #222;
+            padding: 16px 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .ov-card i { font-size: 20px; margin-bottom: 8px; color: var(--admin); }
+
+        /* Gate (login) */
+        #gate {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .gate-box {
+            width: 100%;
+            max-width: 360px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 24px 16px;
+            border-radius: 8px;
+        }
+
+        /* Hide explorer on mobile */
+        .explorer { display: none; }
+
+        @media (min-width: 768px) {
+            .explorer { 
+                display: block; 
+                width: 240px; 
+                background: var(--panel); 
+                border-right: 1px solid var(--border); 
+                padding: 16px; 
+                overflow-y: auto;
+            }
+            main { flex-direction: row; }
+            .intelligence { 
+                width: 320px; 
+                border-left: 1px solid var(--border); 
+                border-top: none; 
+                max-height: none;
+            }
+            #editor-wrapper { flex: 1; min-height: auto; }
+            .ov-sidebar { flex-wrap: nowrap; flex-direction: column; }
+            .ov-tab { flex: none; }
+            .ov-card-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="heart-rain" id="rain"></div>
 
-    <div class="content">
-      <div class="top-text">Sayılı gün hızlı geçer.</div>
-
-      <div class="big-heart">
-        <div class="heart-shape"></div>
-        <div class="countdown" id="countdown"></div>
-      </div>
-
-      <div class="bottom-text">DİMİ?</div>
+<div id="gate">
+    <div class="gate-box">
+        <h1 class="logo" style="text-align:center; font-size:38px; margin-bottom:24px;">OMNI V48</h1>
+        <input type="text" id="uid" class="flat-input" placeholder="IDENTITY_ID" style="margin-bottom:12px;">
+        <input type="password" id="ukey" class="flat-input" placeholder="SECURITY_KEY" style="margin-bottom:16px;">
+        <button class="btn btn-run" style="width:100%; padding:12px; font-size:14px;" onclick="SystemKernel.boot()">ACCESS CORE</button>
     </div>
-  </div>
+</div>
 
-  <script>
-    // Kalp şelalesi
-    function createHeart() {
-      const heart = document.createElement("div");
-      heart.className = "heart";
-      heart.innerHTML = "💗";
-      heart.style.left = Math.random() * 100 + "vw";
-      heart.style.animationDuration = (Math.random() * 5 + 6) + "s";
-      heart.style.animationDelay = Math.random() * 2 + "s";
-      heart.style.opacity = Math.random() * 0.5 + 0.5;
-      document.getElementById("rain").appendChild(heart);
-      setTimeout(() => heart.remove(), 12000);
+<header>
+    <div class="logo">OMNIPOTENCE</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+        <select id="lang-select" class="btn" style="background:transparent; padding:6px 10px;">
+            <option value="python">PYTHON</option>
+            <option value="javascript">JS</option>
+        </select>
+        <button class="btn btn-run" onclick="SystemKernel.execute()">RUN</button>
+    </div>
+</header>
+
+<main>
+    <aside class="explorer">
+        <div style="font-size:10px; color:#444; margin-bottom:12px;">FILES</div>
+        <div class="file-item active" onclick="SystemKernel.loadFile('main.py', this)"><i class="fab fa-python"></i> main.py</div>
+        <div class="file-item" onclick="SystemKernel.loadFile('config.json', this)"><i class="fas fa-cog"></i> config.json</div>
+    </aside>
+
+    <section id="editor-wrapper">
+        <div id="ace-editor"></div>
+        <div id="terminal-drawer">
+            <div class="term-head">
+                <span>OUTPUT</span>
+                <span onclick="UI.toggleTerminal(false)" style="cursor:pointer">×</span>
+            </div>
+            <div id="term-body"></div>
+        </div>
+    </section>
+
+    <aside class="intelligence">
+        <div class="panel-header">GLOBAL CHAT</div>
+        <div class="chat-stream" id="global-chat"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" class="flat-input" placeholder="Mesaj...">
+        </div>
+    </aside>
+</main>
+
+<footer>
+    <span>● ONLINE</span>
+    <span>ID: <span id="footer-user">GUEST</span></span>
+    <span>V48</span>
+</footer>
+
+<script>
+// ────────────────────────────────────────────────
+//  Kısaltılmış & mobil odaklı kernel
+// ────────────────────────────────────────────────
+
+const fcfg = { 
+    apiKey: "AIzaSyDpaFcKI6XhYuWCiyZHUFey0T6uqKy8IPA", 
+    databaseURL: "https://prem-d18e3-default-rtdb.firebaseio.com" 
+};
+firebase.initializeApp(fcfg);
+const db = firebase.database();
+
+const editor = ace.edit("ace-editor");
+editor.setTheme("ace/theme/terminal");
+editor.session.setMode("ace/mode/python");
+editor.setOptions({ fontSize: "14px", enableLiveAutocompletion: true });
+
+const VFS = {
+    'main.py': `print("OMNI V48 Mobile Ready.")`,
+    'config.json': `{"version": "48-mobile"}`
+};
+
+const SystemKernel = {
+    py: null,
+    user: "Guest",
+    async boot() {
+        this.user = document.getElementById("uid").value.trim() || "User"+Math.floor(Math.random()*999);
+        document.getElementById("gate").style.display = "none";
+        document.getElementById("footer-user").innerText = this.user.toUpperCase();
+        this.py = await loadPyodide();
+        editor.setValue(VFS['main.py'], -1);
+    },
+    loadFile(name, el) {
+        document.querySelectorAll('.file-item').forEach(i=>i.classList.remove('active'));
+        el.classList.add('active');
+        editor.setValue(VFS[name] || "# Dosya içeriği", -1);
+    },
+    async execute() {
+        UI.toggleTerminal(true);
+        const out = document.getElementById("term-body");
+        out.innerHTML = "> Çalıştırılıyor...\n";
+        try {
+            if(document.getElementById("lang-select").value === "python") {
+                await this.py.runPythonAsync(editor.getValue());
+                out.innerHTML += "→ Tamamlandı.";
+            } else {
+                eval(editor.getValue());
+                out.innerHTML += "→ JS çalıştırıldı.";
+            }
+        } catch(e) {
+            out.innerHTML += `<span style="color:#ff003c">[HATA] ${e.message}</span>`;
+        }
     }
+};
 
-    setInterval(createHeart, 80);
-    for(let i = 0; i < 30; i++) createHeart();
-
-    // Geri sayım
-    function getNextBirthday() {
-      const now = new Date();
-      let birthday = new Date(now.getFullYear(), 11, 2);
-      if (now > birthday) {
-        birthday.setFullYear(now.getFullYear() + 1);
-      }
-      return birthday;
+const UI = {
+    toggleTerminal(show) {
+        document.getElementById("terminal-drawer").style.display = show ? "flex" : "none";
     }
+};
 
-    function updateCountdown() {
-      const target = getNextBirthday();
-      const diff = target - new Date();
-      if (diff <= 0) {
-        document.getElementById("countdown").innerHTML = "Doğum günün kutlu olsun!";
-        return;
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      document.getElementById("countdown").innerHTML = 
-        `${days}g ${hours}s ${minutes}d ${seconds}sn`;
+// Chat
+document.getElementById("chat-input").onkeypress = e => {
+    if(e.key === "Enter" && e.target.value.trim()) {
+        db.ref("v48_chat").push({
+            u: SystemKernel.user,
+            m: e.target.value,
+            t: Date.now()
+        });
+        e.target.value = "";
     }
+};
 
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-  </script>
+db.ref("v48_chat").limitToLast(50).on("value", snap => {
+    const box = document.getElementById("global-chat");
+    box.innerHTML = "";
+    snap.forEach(d => {
+        const v = d.val();
+        box.innerHTML += `<div><b style="color:var(--primary)">${v.u}:</b> ${v.m}</div>`;
+    });
+    box.scrollTop = box.scrollHeight;
+});
+</script>
 </body>
-</html>
+  </html>
