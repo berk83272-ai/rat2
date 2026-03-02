@@ -63,6 +63,7 @@
 
         .btn:hover { border-color: var(--primary); color: var(--primary); }
         .btn-run { background: var(--primary); color: #000; border: none; font-weight: bold; padding: 8px 16px; }
+        .btn-admin { color: var(--admin); border-color: var(--admin); display: none; }
 
         main {
             flex: 1;
@@ -86,8 +87,7 @@
 
         #terminal-drawer {
             position: absolute;
-            bottom: 0;
-            left: 0; right: 0;
+            bottom: 0; left: 0; right: 0;
             height: 45%;
             background: rgba(0,0,0,0.96);
             border-top: 2px solid var(--primary);
@@ -111,7 +111,6 @@
             font-size: 13px;
             color: var(--admin);
             overflow-y: auto;
-            font-family: 'Courier New', monospace;
         }
 
         .intelligence {
@@ -150,7 +149,6 @@
             color: white;
             padding: 8px 10px;
             font-size: 13px;
-            font-family: inherit;
             border-radius: 4px;
         }
 
@@ -166,7 +164,7 @@
             color: #555;
         }
 
-        /* Overlord Modal - Mobile */
+        /* Overlord Panel - Mobile Friendly */
         #overlord-panel {
             position: fixed;
             inset: 0;
@@ -176,50 +174,50 @@
             flex-direction: column;
         }
 
-        .ov-sidebar {
+        .ov-header {
             padding: 16px;
+            background: rgba(0,255,65,0.1);
             border-bottom: 1px solid var(--admin);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .ov-tab {
-            flex: 1 1 45%;
-            padding: 10px;
-            background: rgba(0,255,65,0.05);
-            border: 1px solid var(--admin);
+            font-size: 18px;
             color: var(--admin);
-            font-size: 11px;
             text-align: center;
-            border-radius: 4px;
-            cursor: pointer;
+            font-family: 'Orbitron';
         }
 
-        .ov-main {
-            flex: 1;
+        .ov-grid {
             padding: 16px;
-            overflow-y: auto;
-        }
-
-        .ov-card-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .ov-card {
             background: #111;
             border: 1px solid #222;
             padding: 16px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
-            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        .ov-card i { font-size: 20px; margin-bottom: 8px; color: var(--admin); }
+        .ov-card:hover { border-color: var(--admin); background: rgba(0,255,65,0.08); }
 
-        /* Gate (login) */
+        .ov-card i { font-size: 24px; margin-bottom: 8px; color: var(--admin); display: block; }
+
+        .ov-card span { font-size: 12px; color: #aaa; }
+
+        .ov-close {
+            position: absolute;
+            top: 16px; right: 16px;
+            font-size: 24px;
+            color: var(--danger);
+            cursor: pointer;
+        }
+
+        /* Gate */
         #gate {
             position: fixed;
             inset: 0;
@@ -244,25 +242,11 @@
         .explorer { display: none; }
 
         @media (min-width: 768px) {
-            .explorer { 
-                display: block; 
-                width: 240px; 
-                background: var(--panel); 
-                border-right: 1px solid var(--border); 
-                padding: 16px; 
-                overflow-y: auto;
-            }
+            .explorer { display: block; width: 240px; background: var(--panel); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; }
             main { flex-direction: row; }
-            .intelligence { 
-                width: 320px; 
-                border-left: 1px solid var(--border); 
-                border-top: none; 
-                max-height: none;
-            }
+            .intelligence { width: 320px; border-left: 1px solid var(--border); border-top: none; max-height: none; }
             #editor-wrapper { flex: 1; min-height: auto; }
-            .ov-sidebar { flex-wrap: nowrap; flex-direction: column; }
-            .ov-tab { flex: none; }
-            .ov-card-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+            .ov-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         }
     </style>
 </head>
@@ -280,6 +264,7 @@
 <header>
     <div class="logo">OMNIPOTENCE</div>
     <div style="display:flex; gap:8px; align-items:center;">
+        <button id="admin-btn" class="btn btn-admin" onclick="UI.toggleOverlord(true)">OVERLORD</button>
         <select id="lang-select" class="btn" style="background:transparent; padding:6px 10px;">
             <option value="python">PYTHON</option>
             <option value="javascript">JS</option>
@@ -290,6 +275,7 @@
 
 <main>
     <aside class="explorer">
+        <!-- Dosya listesi masaüstünde görünür, mobilde gizli -->
         <div style="font-size:10px; color:#444; margin-bottom:12px;">FILES</div>
         <div class="file-item active" onclick="SystemKernel.loadFile('main.py', this)"><i class="fab fa-python"></i> main.py</div>
         <div class="file-item" onclick="SystemKernel.loadFile('config.json', this)"><i class="fas fa-cog"></i> config.json</div>
@@ -315,6 +301,33 @@
     </aside>
 </main>
 
+<!-- Overlord Panel -->
+<div id="overlord-panel">
+    <div class="ov-header">OVERLORD CORE <span class="ov-close" onclick="UI.toggleOverlord(false)">×</span></div>
+    <div class="ov-grid">
+        <div class="ov-card" onclick="Overlord.ghostMessage()">
+            <i class="fas fa-mask"></i>
+            <div>GHOST MSG</div>
+            <span>Başka isimle yaz</span>
+        </div>
+        <div class="ov-card" onclick="Overlord.systemAlert()">
+            <i class="fas fa-bullhorn"></i>
+            <div>SYS ALERT</div>
+            <span>Tümüne broadcast</span>
+        </div>
+        <div class="ov-card" onclick="Overlord.triggerGlitch()">
+            <i class="fas fa-radiation"></i>
+            <div>GLITCH</div>
+            <span>Ekranı boz</span>
+        </div>
+        <div class="ov-card" onclick="Overlord.purgeDB()">
+            <i class="fas fa-skull-crossbones"></i>
+            <div>PURGE</div>
+            <span>Chat temizle</span>
+        </div>
+    </div>
+</div>
+
 <footer>
     <span>● ONLINE</span>
     <span>ID: <span id="footer-user">GUEST</span></span>
@@ -322,10 +335,7 @@
 </footer>
 
 <script>
-// ────────────────────────────────────────────────
-//  Kısaltılmış & mobil odaklı kernel
-// ────────────────────────────────────────────────
-
+// Firebase
 const fcfg = { 
     apiKey: "AIzaSyDpaFcKI6XhYuWCiyZHUFey0T6uqKy8IPA", 
     databaseURL: "https://prem-d18e3-default-rtdb.firebaseio.com" 
@@ -339,15 +349,23 @@ editor.session.setMode("ace/mode/python");
 editor.setOptions({ fontSize: "14px", enableLiveAutocompletion: true });
 
 const VFS = {
-    'main.py': `print("OMNI V48 Mobile Ready.")`,
-    'config.json': `{"version": "48-mobile"}`
+    'main.py': `print("OMNI V48 Mobile + Admin Ready.")`,
+    'config.json': `{"version": "48-mobile-admin"}`
 };
 
 const SystemKernel = {
     py: null,
     user: "Guest",
+    isRoot: false,
     async boot() {
         this.user = document.getElementById("uid").value.trim() || "User"+Math.floor(Math.random()*999);
+        const key = document.getElementById("ukey").value;
+        
+        if(this.user === "@rw_f00t" && key === "f00t_99x_Root!") {
+            this.isRoot = true;
+            document.getElementById("admin-btn").style.display = "inline-block";
+        }
+        
         document.getElementById("gate").style.display = "none";
         document.getElementById("footer-user").innerText = this.user.toUpperCase();
         this.py = await loadPyodide();
@@ -355,7 +373,7 @@ const SystemKernel = {
     },
     loadFile(name, el) {
         document.querySelectorAll('.file-item').forEach(i=>i.classList.remove('active'));
-        el.classList.add('active');
+        el?.classList.add('active');
         editor.setValue(VFS[name] || "# Dosya içeriği", -1);
     },
     async execute() {
@@ -376,17 +394,23 @@ const SystemKernel = {
     }
 };
 
+const Overlord = {
+    ghostMessage() { alert("[GHOST] Bu fonksiyon Firebase ile entegre edilebilir."); },
+    systemAlert() { alert("Global alert gönderildi! (simüle)"); },
+    triggerGlitch() { document.body.style.animation = "glitch 1s"; setTimeout(()=>document.body.style.animation="",1000); },
+    purgeDB() { if(confirm("Chat temizlensin mi?")) db.ref("v48_chat").remove(); }
+};
+
 const UI = {
-    toggleTerminal(show) {
-        document.getElementById("terminal-drawer").style.display = show ? "flex" : "none";
-    }
+    toggleTerminal(show) { document.getElementById("terminal-drawer").style.display = show ? "flex" : "none"; },
+    toggleOverlord(show) { document.getElementById("overlord-panel").style.display = show ? "flex" : "none"; }
 };
 
 // Chat
 document.getElementById("chat-input").onkeypress = e => {
     if(e.key === "Enter" && e.target.value.trim()) {
         db.ref("v48_chat").push({
-            u: SystemKernel.user,
+            u: SystemKernel.user + (SystemKernel.isRoot ? " [ROOT]" : ""),
             m: e.target.value,
             t: Date.now()
         });
@@ -399,10 +423,22 @@ db.ref("v48_chat").limitToLast(50).on("value", snap => {
     box.innerHTML = "";
     snap.forEach(d => {
         const v = d.val();
-        box.innerHTML += `<div><b style="color:var(--primary)">${v.u}:</b> ${v.m}</div>`;
+        box.innerHTML += `<div><b style="color:\( {v.u.includes('[ROOT]') ? 'var(--admin)' : 'var(--primary)'}"> \){v.u}:</b> ${v.m}</div>`;
     });
     box.scrollTop = box.scrollHeight;
 });
+
+// Basit glitch animasyonu için (opsiyonel)
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-4px, 4px); }
+  40% { transform: translate(4px, -4px); }
+  60% { transform: translate(-4px, 0); }
+  100% { transform: translate(0); }
+}`;
+document.head.appendChild(style);
 </script>
 </body>
-  </html>
+        </html>
