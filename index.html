@@ -15,248 +15,45 @@
 
     <style>
         :root {
-            --primary: #00d4ff;
-            --admin: #00ff41;
-            --danger: #ff003c;
-            --bg: #020202;
-            --panel: #0a0a0c;
-            --border: #1f1f23;
+            --primary: #00d4ff; --admin: #00ff41; --danger: #ff003c;
+            --bg: #020202; --panel: #0a0a0c; --border: #1f1f23;
             --text: #e0e0e0;
         }
-
         * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            height: 100vh;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Fira Code', monospace;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            height: 56px;
-            background: var(--panel);
-            border-bottom: 1px solid var(--border);
-            padding: 0 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 100;
-        }
-
-        .logo { 
-            font-family: 'Orbitron'; 
-            font-size: 18px; 
-            color: var(--primary); 
-            letter-spacing: 2px;
-        }
-
-        .btn {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
-            font-size: 11px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn:hover { border-color: var(--primary); color: var(--primary); }
-        .btn-run { background: var(--primary); color: #000; border: none; font-weight: bold; padding: 8px 16px; }
-        .btn-admin { color: var(--admin); border-color: var(--admin); display: none; }
-
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #editor-wrapper {
-            flex: 1;
-            position: relative;
-            background: #000;
-            min-height: 40vh;
-        }
-
-        #ace-editor {
-            position: absolute;
-            inset: 0;
-            font-size: 14px !important;
-        }
-
-        #terminal-drawer {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 45%;
-            background: rgba(0,0,0,0.96);
-            border-top: 2px solid var(--primary);
-            display: none;
-            flex-direction: column;
-            z-index: 200;
-        }
-
-        .term-head {
-            background: #000;
-            padding: 8px 12px;
-            font-size: 11px;
-            color: var(--primary);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #term-body {
-            flex: 1;
-            padding: 12px;
-            font-size: 13px;
-            color: var(--admin);
-            overflow-y: auto;
-        }
-
-        .intelligence {
-            background: var(--panel);
-            border-top: 1px solid var(--border);
-            max-height: 32vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-header {
-            padding: 8px 12px;
-            background: rgba(0,0,0,0.5);
-            font-size: 11px;
-            color: var(--primary);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .chat-stream {
-            flex: 1;
-            padding: 10px 12px;
-            font-size: 12px;
-            overflow-y: auto;
-            line-height: 1.4;
-        }
-
-        .chat-input-area {
-            padding: 8px 12px;
-            border-top: 1px solid var(--border);
-        }
-
-        .flat-input {
-            width: 100%;
-            background: #111;
-            border: 1px solid var(--border);
-            color: white;
-            padding: 8px 10px;
-            font-size: 13px;
-            border-radius: 4px;
-        }
-
-        footer {
-            height: 32px;
-            background: #000;
-            border-top: 1px solid var(--border);
-            padding: 0 12px;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #555;
-        }
-
-        /* Overlord */
-        #overlord-panel {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 10000;
-            display: none;
-            flex-direction: column;
-        }
-
-        .ov-header {
-            padding: 16px;
-            background: rgba(0,255,65,0.1);
-            border-bottom: 1px solid var(--admin);
-            font-size: 18px;
-            color: var(--admin);
-            text-align: center;
-            font-family: 'Orbitron';
-        }
-
-        .ov-grid {
-            padding: 16px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .ov-card {
-            background: #111;
-            border: 1px solid #222;
-            padding: 16px 12px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .ov-card:hover { border-color: var(--admin); background: rgba(0,255,65,0.08); }
-
-        .ov-card i { font-size: 24px; margin-bottom: 8px; color: var(--admin); display: block; }
-
-        .ov-card span { font-size: 12px; color: #aaa; }
-
-        .ov-close {
-            position: absolute;
-            top: 16px; right: 16px;
-            font-size: 24px;
-            color: var(--danger);
-            cursor: pointer;
-        }
-
-        /* Neon efektleri */
-        @keyframes neon-flicker {
-            0%,19%,21%,23%,25%,54%,56%,100% { text-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
-            20%,24%,55% { text-shadow: none; }
-        }
-
-        .neon-turquoise { color: var(--primary); text-shadow: 0 0 6px var(--primary), 0 0 12px var(--primary); animation: neon-flicker 4s infinite; }
-        .neon-red { color: var(--danger); text-shadow: 0 0 8px var(--danger), 0 0 16px var(--danger); animation: neon-flicker 3s infinite; font-weight: bold; }
-
-        /* Gate */
-        #gate {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 999999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .gate-box {
-            width: 100%;
-            max-width: 360px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            padding: 24px 16px;
-            border-radius: 8px;
-        }
-
-        .explorer { display: none; }
-
-        @media (min-width: 768px) {
-            .explorer { display: block; width: 240px; background: var(--panel); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; }
-            main { flex-direction: row; }
-            .intelligence { width: 320px; border-left: 1px solid var(--border); border-top: none; max-height: none; }
-            #editor-wrapper { flex: 1; min-height: auto; }
-            .ov-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-        }
+        body { height:100vh; background:var(--bg); color:var(--text); font-family:'Fira Code',monospace; overflow:hidden; display:flex; flex-direction:column; }
+        header { height:56px; background:var(--panel); border-bottom:1px solid var(--border); padding:0 12px; display:flex; align-items:center; justify-content:space-between; z-index:100; }
+        .logo { font-family:'Orbitron'; font-size:18px; color:var(--primary); letter-spacing:2px; }
+        .btn { background:rgba(255,255,255,0.04); border:1px solid var(--border); color:var(--text); padding:6px 12px; font-size:11px; border-radius:4px; cursor:pointer; }
+        .btn:hover { border-color:var(--primary); color:var(--primary); }
+        .btn-run { background:var(--primary); color:#000; border:none; font-weight:bold; padding:8px 16px; }
+        .btn-admin { color:var(--admin); border-color:var(--admin); display:none; }
+        main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+        #editor-wrapper { flex:1; position:relative; background:#000; min-height:40vh; }
+        #ace-editor { position:absolute; inset:0; font-size:14px !important; }
+        #terminal-drawer { position:absolute; bottom:0; left:0; right:0; height:45%; background:rgba(0,0,0,0.96); border-top:2px solid var(--primary); display:none; flex-direction:column; z-index:200; }
+        .term-head { background:#000; padding:8px 12px; font-size:11px; color:var(--primary); display:flex; justify-content:space-between; }
+        #term-body { flex:1; padding:12px; font-size:13px; color:var(--admin); overflow-y:auto; }
+        .intelligence { background:var(--panel); border-top:1px solid var(--border); max-height:32vh; display:flex; flex-direction:column; }
+        .panel-header { padding:8px 12px; background:rgba(0,0,0,0.5); font-size:11px; color:var(--primary); border-bottom:1px solid var(--border); }
+        .chat-stream { flex:1; padding:10px 12px; font-size:12px; overflow-y:auto; line-height:1.4; }
+        .chat-input-area { padding:8px 12px; border-top:1px solid var(--border); }
+        .flat-input { width:100%; background:#111; border:1px solid var(--border); color:white; padding:8px 10px; font-size:13px; border-radius:4px; }
+        footer { height:32px; background:#000; border-top:1px solid var(--border); padding:0 12px; font-size:10px; display:flex; align-items:center; justify-content:space-between; color:#555; }
+        #overlord-panel { position:fixed; inset:0; background:#000; z-index:10000; display:none; flex-direction:column; }
+        .ov-header { padding:16px; background:rgba(0,255,65,0.1); border-bottom:1px solid var(--admin); font-size:18px; color:var(--admin); text-align:center; font-family:'Orbitron'; }
+        .ov-grid { padding:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; overflow-y:auto; flex:1; }
+        .ov-card { background:#111; border:1px solid #222; padding:16px 12px; border-radius:8px; text-align:center; cursor:pointer; }
+        .ov-card:hover { border-color:var(--admin); background:rgba(0,255,65,0.08); }
+        .ov-card i { font-size:24px; margin-bottom:8px; color:var(--admin); display:block; }
+        .ov-card span { font-size:12px; color:#aaa; }
+        .ov-close { position:absolute; top:16px; right:16px; font-size:24px; color:var(--danger); cursor:pointer; }
+        @keyframes neon-flicker { 0%,19%,21%,23%,25%,54%,56%,100% { text-shadow:0 0 8px currentColor,0 0 16px currentColor; } 20%,24%,55% { text-shadow:none; } }
+        .neon-turquoise { color:var(--primary); text-shadow:0 0 6px var(--primary),0 0 12px var(--primary); animation:neon-flicker 4s infinite; }
+        .neon-red { color:var(--danger); text-shadow:0 0 8px var(--danger),0 0 16px var(--danger); animation:neon-flicker 3s infinite; font-weight:bold; }
+        #gate { position:fixed; inset:0; background:#000; z-index:999999; display:flex; align-items:center; justify-content:center; padding:20px; }
+        .gate-box { width:100%; max-width:360px; background:var(--panel); border:1px solid var(--border); padding:24px 16px; border-radius:8px; }
+        .explorer { display:none; }
+        @media (min-width:768px) { .explorer { display:block; width:240px; background:var(--panel); border-right:1px solid var(--border); padding:16px; overflow-y:auto; } main { flex-direction:row; } .intelligence { width:320px; border-left:1px solid var(--border); border-top:none; max-height:none; } #editor-wrapper { flex:1; min-height:auto; } .ov-grid { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); } }
     </style>
 </head>
 <body>
@@ -312,26 +109,10 @@
 <div id="overlord-panel">
     <div class="ov-header">OVERLORD CORE <span class="ov-close" onclick="UI.toggleOverlord(false)">×</span></div>
     <div class="ov-grid">
-        <div class="ov-card" onclick="Overlord.ghostMessage()">
-            <i class="fas fa-mask"></i>
-            <div>GHOST MSG</div>
-            <span>Başka isimle yaz</span>
-        </div>
-        <div class="ov-card" onclick="Overlord.systemAlert()">
-            <i class="fas fa-bullhorn"></i>
-            <div>SYS ALERT</div>
-            <span>Tümüne broadcast</span>
-        </div>
-        <div class="ov-card" onclick="Overlord.triggerGlitch()">
-            <i class="fas fa-radiation"></i>
-            <div>GLITCH</div>
-            <span>Ekranı boz</span>
-        </div>
-        <div class="ov-card" onclick="Overlord.purgeDB()">
-            <i class="fas fa-skull-crossbones"></i>
-            <div>PURGE</div>
-            <span>Chat temizle</span>
-        </div>
+        <div class="ov-card" onclick="Overlord.ghostMessage()"><i class="fas fa-mask"></i><div>GHOST MSG</div><span>Başka isimle yaz</span></div>
+        <div class="ov-card" onclick="Overlord.systemAlert()"><i class="fas fa-bullhorn"></i><div>SYS ALERT</div><span>Tümüne broadcast</span></div>
+        <div class="ov-card" onclick="Overlord.triggerGlitch()"><i class="fas fa-radiation"></i><div>GLITCH</div><span>Ekranı boz</span></div>
+        <div class="ov-card" onclick="Overlord.purgeDB()"><i class="fas fa-skull-crossbones"></i><div>PURGE</div><span>Chat temizle</span></div>
     </div>
 </div>
 
@@ -342,11 +123,7 @@
 </footer>
 
 <script>
-// Firebase
-const fcfg = { 
-    apiKey: "AIzaSyDpaFcKI6XhYuWCiyZHUFey0T6uqKy8IPA", 
-    databaseURL: "https://prem-d18e3-default-rtdb.firebaseio.com" 
-};
+const fcfg = { apiKey: "AIzaSyDpaFcKI6XhYuWCiyZHUFey0T6uqKy8IPA", databaseURL: "https://prem-d18e3-default-rtdb.firebaseio.com" };
 firebase.initializeApp(fcfg);
 const db = firebase.database();
 
@@ -355,24 +132,17 @@ editor.setTheme("ace/theme/terminal");
 editor.session.setMode("ace/mode/python");
 editor.setOptions({ fontSize: "14px", enableLiveAutocompletion: true });
 
-const VFS = {
-    'main.py': `print("OMNI V48 Mobile + Admin Ready.")`,
-    'config.json': `{"version": "48-mobile-admin"}`
-};
+const VFS = { 'main.py': `print("OMNI V48 Ready.")`, 'config.json': `{"version": "48"}` };
 
 const SystemKernel = {
-    py: null,
-    user: "Guest",
-    isRoot: false,
+    py: null, user: "Guest", isRoot: false,
     async boot() {
-        this.user = document.getElementById("uid").value.trim() || "User"+Math.floor(Math.random()*999);
+        this.user = document.getElementById("uid").value.trim() || "Anon"+Math.floor(Math.random()*999);
         const key = document.getElementById("ukey").value;
-        
         if(this.user === "@rw_f00t" && key === "f00t_99x_Root!") {
             this.isRoot = true;
             document.getElementById("admin-btn").style.display = "inline-block";
         }
-        
         document.getElementById("gate").style.display = "none";
         document.getElementById("footer-user").innerText = this.user.toUpperCase();
         this.py = await loadPyodide();
@@ -381,67 +151,42 @@ const SystemKernel = {
     loadFile(name, el) {
         document.querySelectorAll('.file-item').forEach(i=>i.classList.remove('active'));
         el?.classList.add('active');
-        editor.setValue(VFS[name] || "# Dosya içeriği", -1);
+        editor.setValue(VFS[name] || "# İçerik", -1);
     },
     async execute() {
         UI.toggleTerminal(true);
         const out = document.getElementById("term-body");
         out.innerHTML = "> Çalıştırılıyor...\n";
         try {
-            if(document.getElementById("lang-select").value === "python") {
+            const lang = document.getElementById("lang-select").value;
+            if(lang === "python") {
                 await this.py.runPythonAsync(editor.getValue());
-                out.innerHTML += "→ Tamamlandı.";
+                out.innerHTML += "→ Tamam.";
             } else {
                 eval(editor.getValue());
-                out.innerHTML += "→ JS çalıştırıldı.";
+                out.innerHTML += "→ JS tamam.";
             }
-        } catch(e) {
-            out.innerHTML += `<span style="color:#ff003c">[HATA] ${e.message}</span>`;
-        }
+        } catch(e) { out.innerHTML += `<span style="color:var(--danger)">[HATA] ${e.message}</span>`; }
     }
 };
 
 const Overlord = {
-    ghostMessage() { alert("[GHOST] Firebase ile entegre edilebilir."); },
-    systemAlert() { alert("Global alert gönderildi! (simüle)"); },
-    triggerGlitch() { 
-        document.body.classList.add("glitch-active"); 
-        setTimeout(()=>document.body.classList.remove("glitch-active"), 2000); 
-    },
-    purgeDB() { if(confirm("Tüm chat silinsin mi?")) db.ref("v48_chat").remove(); }
+    ghostMessage() { alert("Ghost mesaj: Firebase entegrasyonu eklenebilir."); },
+    systemAlert() { alert("Sistem uyarısı simüle edildi."); },
+    triggerGlitch() { document.body.classList.add("glitch-active"); setTimeout(()=>document.body.classList.remove("glitch-active"),1500); },
+    purgeDB() { if(confirm("Chat silinsin mi?")) db.ref("v48_chat").remove(); }
 };
 
 const UI = {
-    toggleTerminal(show) { document.getElementById("terminal-drawer").style.display = show ? "flex" : "none"; },
-    toggleOverlord(show) { document.getElementById("overlord-panel").style.display = show ? "flex" : "none"; }
+    toggleTerminal(s) { document.getElementById("terminal-drawer").style.display = s?"flex":"none"; },
+    toggleOverlord(s) { document.getElementById("overlord-panel").style.display = s?"flex":"none"; }
 };
 
-// Glitch anim
-const style = document.createElement('style');
-style.innerHTML = `
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-3px, 3px); }
-      40% { transform: translate(3px, -3px); }
-      60% { transform: translate(-3px, 0); }
-      100% { transform: translate(0); }
-    }
-    .glitch-active { animation: glitch 0.4s infinite; }
-`;
-document.head.appendChild(style);
+document.head.insertAdjacentHTML('beforeend', `<style>@keyframes glitch{0%{transform:translate(0)}20%{transform:translate(-3px,3px)}40%{transform:translate(3px,-3px)}60%{transform:translate(-3px,0)}100%{transform:translate(0)}} .glitch-active{animation:glitch 0.4s infinite;}</style>`);
 
-// Chat
 document.getElementById("chat-input").onkeypress = e => {
-    if(e.key === "Enter" && e.target.value.trim()) {
-        const usernameToSend = SystemKernel.isRoot 
-            ? SystemKernel.user + " [ROOT]" 
-            : SystemKernel.user;
-
-        db.ref("v48_chat").push({
-            u: usernameToSend,
-            m: e.target.value,
-            t: Date.now()
-        });
+    if(e.key==="Enter" && e.target.value.trim()) {
+        db.ref("v48_chat").push({ u: SystemKernel.user, m: e.target.value, t: Date.now() });
         e.target.value = "";
     }
 };
@@ -449,27 +194,16 @@ document.getElementById("chat-input").onkeypress = e => {
 db.ref("v48_chat").limitToLast(50).on("value", snap => {
     const box = document.getElementById("global-chat");
     box.innerHTML = "";
-
     snap.forEach(d => {
         const v = d.val();
-        const isOwner = v.u.includes("@rw_f00t") || v.u.includes("[ROOT]");
-
+        const isOwner = v.u === "@rw_f00t" || v.u === SystemKernel.user && SystemKernel.isRoot;
         const nameClass = isOwner ? "neon-red" : "neon-turquoise";
-        let displayName = v.u.replace(" [ROOT]", "");
-
-        if (isOwner) {
-            displayName += ' <span class="neon-red">[OWNER]</span>';
-        }
-
-        box.innerHTML += `
-            <div style="margin: 8px 0; line-height:1.4; word-break:break-word;">
-                <b class="\( {nameClass}"> \){displayName}:</b> 
-                <span style="color:#e0e0e0;">${v.m}</span>
-            </div>`;
+        let display = v.u;
+        if(isOwner) display += ' <span class="neon-red">[OWNER]</span>';
+        box.innerHTML += `<div style="margin:8px 0; line-height:1.4; word-break:break-word;"><b class="\( {nameClass}"> \){display}:</b> <span style="color:#e0e0e0;">${v.m}</span></div>`;
     });
-
     box.scrollTop = box.scrollHeight;
 });
 </script>
 </body>
-</html>
+    </html>
